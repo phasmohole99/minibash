@@ -15,9 +15,9 @@
 
 # include <term.h>
 # include <curses.h>
-# include <termWin.h>
+# include <termios.h>
 # include <stdint.h>
-# include <sys/Winctl.h>
+# include <sys/ioctl.h>
 # include <stdlib.h>
 # include <unistd.h>
 # include <sys/wait.h>
@@ -52,6 +52,14 @@ enum	e_type
 
 struct	s_tokenizer
 {
+	int to_free;
+	int i;
+	int check;
+	char *dup;
+	int len;
+	char *var;
+	char *id;
+	char *identify;
 	char		*content;
 	t_type		type;
 	t_tokenizer	*next;
@@ -74,12 +82,19 @@ typedef struct s_pipe
 	char	**cmd;
 	char 	*cmd_name;
 }				t_pipe;
-void expand (t_data *data,char **envi)
-void	ft_remove_quote(t_node *head);
-void	ft_quote(t_cmd *cmd);
-void	ft_skip(t_token *s, char *data);
-void	ft_help_get_str(char *data, t_token *s);
-char	*get_new_string(int str_len, char *data);
+int	ft_hundling(t_tokenizer *s, char *data, char *string,char **env);
+char	*ft_free_new_str(t_tokenizer *s);
+char *get_new_string(int len,char *content,char **env);
+void ft_help_get_str(char *content,t_tokenizer *token,char **env);
+void ft_go(t_tokenizer *token,char *content);
+void expand(t_data *data);
+void ft_get_len(t_tokenizer *token,char *data,char **env);
+int get_str_len(char* content,char **env);
+char *get_expand(char *content,char **env);
+void ft_mini_expen(t_tokenizer *token,char **env);
+int	ft_valid(char c);
+char	*get_index(char *string);
+char *get_var(char *id, char **env);
 
 void	ft_export(char **args, t_data *data);
 void	export_alone(t_data *data);
@@ -118,7 +133,7 @@ void	error_sentence(char *str);
 int check_quotes(char* line);
 int	analylizer(t_list *list);
 
-void expand(t_data *data);
+// void expand(t_data *data);
 
 // void printerr(int i);
 

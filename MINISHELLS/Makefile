@@ -36,12 +36,14 @@ SRC =	main.c \
 		srcs/execution/compound_cmd.c \
 		srcs/analylizer/analylizer.c \
 		srcs/expand/expand.c \
+		srcs/expand/expand_utils.c\
+		
 
 
 LIBFT	= libft/libft.a
 NAME = minishell
 CC = cc
-FLAGS = -Wall -Wextra -Werror #-fsanitize=address -g
+FLAGS = -Wall -Wextra -Werror -fsanitize=address -g
 RM = rm -f
 OBJS := $(SRC:.c=.o)
 INCLUDE	= -L libft -lft #-I ../minishell.h

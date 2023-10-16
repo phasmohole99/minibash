@@ -109,18 +109,13 @@ int		main(int ac, char **av, char **env)
 				}		
 				ft_lstclear(&lst);
 				tokenizer(&data);
-<<<<<<< HEAD
-				// if(						)
-				// data --> expand nodes check $
-=======
+				// t_tokenizer *current = data.tokenizer;
+				// while (current != NULL)
+				// {
+				// 	printf("==========================\nContent: %s\nType: %s\n==================\n", current->content, (current->type == STRING) ? "STRING" : "ENV_VARIABLE");
+				// 	current = current->next;
+				// }
 				expand(&data);
-				t_tokenizer *current = data.tokenizer;
-				while (current != NULL)
-				{
-					printf("==========================\nContent: %s\nType: %s\n==================\n", current->content, (current->type == STRING) ? "STRING" : "ENV_VARIABLE");
-					current = current->next;
-				}
->>>>>>> df2bec8abe991d622d1aea564e699aaa5086c498
 				execute(&data);
 				free(line);
 				free_token_list(&data.tokenizer);

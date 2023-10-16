@@ -10,172 +10,87 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-<<<<<<< HEAD
-#include "minishell.h"
 
-
-// echo $USER
-// node1 = echo 
-// node2 = $USER
-
-void	expand(t_cmd *cmd, t_env *envi)
-{
-	t_cmd	*tmp;
-
-	tmp = cmd;
-	while (tmp)
-	{
-		ft_mini_expen(tmp->args, envi);
-		if (tmp->in_reds)
-			ft_mini_expen(tmp->in_reds, envi);
-		if (tmp->out_reds)
-			ft_mini_expen(tmp->out_reds, envi);
-		tmp = tmp->next;
-	}
-	ft_quote(cmd);
-}
-
-void	ft_mini_expen(t_node *node, t_env *envi)
-{
-	t_node	*tmp;
-
-	tmp = node;
-	while (tmp)
-	{
-		tmp->data = get_expanded(tmp->data, envi);
-		tmp = tmp->next;
-	}
-}
-
-char	*get_expanded(char *data, t_env *envi)
-{
-	char	*string;
-	int		str_len;
-
-	str_len = get_str_len(data, envi);
-	string = get_new_string(str_len, data);
-	free(data);
-	return (string);
-}
-
-int	get_str_len(char *data, t_env *envi)
-{
-	t_token	s;
-
-	s.j = 0;
-	s.len = 0;
-	while (data[s.j])
-	{
-		if (data[s.j] == '\'' && ++s.j)
-		{
-			while (data[s.j] && data[s.j] != '\'')
-			{
-				s.len++;
-				s.j++;
-			}
-		}
-		else if (data[s.j] == '$' && ++s.j)
-			ft_help_get_len(&s, data, envi);
-		else
-		{
-			s.len++;
-			s.j++;
-		}
-	}
-	return (s.len);
-}
-
-void	ft_help_get_len(t_token *s, char *data, t_env *envi)
-{
-	if (ft_is_valid(data[s->j]) == 0)
-		s->len++;
-	else
-	{
-		s->id = get_index(&data[s->j]);
-		s->value = get_value(s->id, envi);
-		if (!s->value)
-		{
-			free(s->id);
-			return ;
-		}
-		s->j = s->j + ft_strlen(s->id);
-		s->len = s->len + ft_strlen(s->value);
-		free(s->id);
-	}
-}
-
-// int expand_check(t_data *data,char **env)
-// {
-//     (void)env;
-//     if()
-// }
-
-
-// void expand(t_data *data)
-// {
-//     t_data *curr = data;
-    
-    
-// }
-=======
 #include "../../minishell.h"
 
-// expand check if my data have $ in first word so i have expand it 
-// check if the word in single quotes or double quotes
 
-
-// check if have $ and 
-// echo "$USER"
-// 
-
-// int check_ex(t_data *data)
-// {
-//     t_data *curr;
-//     t_list *lst = data->lst;
-    
-//     curr = data;
-//     while(lst)
-//     {
-//         if(ft_strcmp(lst->content,"$"))
-//             value_env(curr->env,lst->content);
-//         else
-//             return 0;
-//         lst = lst->next;
-//     }
-//     return 1;
-// }
-
-void expand(t_data *data) 
+void ft_mini_expen(t_tokenizer *token,char **env)
 {
-    if (data->tokenizer == NULL) 
-        return;
-
-    t_tokenizer *current = data->tokenizer;
-    while (current != NULL) 
+    t_tokenizer *cmd = token;
+    
+    while (cmd)
     {
-        if (current->type == STRING && strstr(current->content, "$") != NULL) {
-            char *ex_content = malloc(2 * strlen(current->content));
-            ex_content[0] = '\0';
-
-            char *token = strtok(current->content, "$");
-            while (token != NULL)
-            {
-                char *envValue = getenv(token);
-                if (envValue != NULL) {
-                    strcat(ex_content, envValue);
-                } else {
-                    strcat(ex_content, "$");
-                    strcat(ex_content, token);
-                }
-                token = strtok(NULL, "$");
-            }
-
-            free(current->content);
-            current->content = ex_content;
-            current->type = ENV_VARIABLE;
-        }
-
-        current = current->next;
+        cmd->content = get_expand(cmd->content,env);
+        cmd = cmd->next;
     }
 }
->>>>>>> df2bec8abe991d622d1aea564e699aaa5086c498
+
+char *get_expand(char *content,char **env)
+{
+    int len = get_str_len(content,env);
+    char *str = get_new_string(len,content,env);
+    free(content);
+    return (str);
+}
+
+
+// int j ,len;
+// char *value ,*id;
+int get_str_len(char* data,char **env)
+{
+    t_tokenizer s;
+
+    s.i = 0;
+    s.len = 0;
+    while(data[s.i])
+    {
+        if(data[s.i] && data[s.i] != '\'')
+        {
+            s.len++;
+            s.i++;
+        }
+        else if (data[s.i] == '$' && ++s.i)
+            ft_get_len(&s,data,env);
+        else
+        {
+            s.len++;
+            s.i++;
+        }
+    }
+    return (s.len);
+}
+
+void ft_get_len(t_tokenizer *token,char *data,char **env)
+{
+    if(ft_valid(data[token->i]) == 0)
+        token->len++;
+    else
+    {
+        token->id=  get_index(&data[token->i]);
+        token->var = get_var(token->id,env);
+        if(!token->var)
+        {
+            free(token->id);
+            return;
+        }
+        token->i = token->i + ft_strlen(token->id);
+        token->len = token->len + ft_strlen(token->var);
+        free(token->id);
+    }
+}
+
+void expand(t_data *data)
+{
+    t_tokenizer *cmd = data->tokenizer;
+
+    while (cmd)
+    {
+        ft_mini_expen(cmd,data->env);
+        if(cmd->type == RED_IN)
+            ft_mini_expen(cmd,data->env);
+        if(cmd->type == RED_OUT_APPEND 
+        || cmd ->type == RED_OUT_TRUNC)
+            ft_mini_expen(cmd,data->env);
+        cmd = cmd->next;
+    }
+}

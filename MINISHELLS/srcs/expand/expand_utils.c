@@ -10,98 +10,102 @@
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "minishell.h"
-
-char	*get_new_string(int str_len, char *data)
+#include "../../minishell.h"
+// ft_valid | get_index | get_value | get_new_string
+char *get_new_string(int len,char *content,char **env)
 {
-	t_token	*s;
+    t_tokenizer *token;
+    token = (t_tokenizer *) malloc(sizeof(t_tokenizer));
+    char *str;
+
+    token->dup = calloc(len + 1,sizeof(char));
+    token->i  = 0;
+    token->check = 0;
+    token->len = 0;
+    while(content[token->i])
+    {
+        if(content[token->i]== '\'' && ++token->i)
+            ft_go(token,content);
+        else if (content[token->i] == '$' && ++token->i)
+            ft_help_get_str(content,token,env);
+        else
+        {
+            token->dup[token->len] = content[token->i];
+            token->len++;
+            token->i++;
+        }
+    }
+    token->dup[token->len] = '\0';
+    str = ft_free_new_str(token);
+    return (str);
+}
+
+void ft_help_get_str(char *content,t_tokenizer *token,char **env)
+{
+    char *str = NULL;
+
+    if(ft_valid(content[token->i]) == 0)
+    {
+        token->dup[token->len] = content[token->i];
+        token->len++;
+    }
+    else
+    {
+        if(ft_hundling(token,content,str,env) == 1)
+            return;
+    }
+}
+
+void ft_go(t_tokenizer *token,char *content)
+{
+    token->dup[token->len] = '\'';
+    token->len++;
+    while(content[token->i] && content[token->i] != '\'')
+    {
+        token->dup[token->len] = content[token->i];
+        token->len++;
+        token->i++;
+    }
+    token->dup[token->len] = '\'';
+}
+
+char	*ft_free_new_str(t_tokenizer *s)
+{
 	char	*string;
 
-	s = (t_token *)malloc(sizeof(t_token));
-	s->string = calloc(str_len + 1, sizeof(char));
-	s->j = 0;
-	s->check = 0;
-	s->len = 0;
-	while (data[s->j])
+	if (s->check)
 	{
-		if (data[s->j] == '\'' && ++s->j)
-			ft_skip(s, data);
-		else if (data[s->j] == '$' && ++s->j)
-			ft_help_get_str(data, s);
-		else
-		{
-			s->string[s->len] = data[s->j];
-			s->len++;
-			s->j++;
-		}
+		free(s->dup);
+		s->dup = ft_strdup("");
 	}
-	s->string[s->len] = '\0';
-	string = ft_free_new_str(s);
+	string = ft_strdup(s->dup);
+	free(s->dup);
+	free(s);
 	return (string);
 }
 
-void	ft_help_get_str(char *data, t_token *s)
+int	ft_hundling(t_tokenizer *s, char *data, char *string,char **env)
 {
-	char	*string;
-
-	string = NULL;
-	if (ft_is_valid(data[s->j]) == 0)
+	s->identify = get_index(&data[s->i]);
+	s->var = get_var(s->identify, env);
+	if (s->identify[0] == '?' && s->identify[1] == '\0')
 	{
-		s->string[s->len] = data[s->j];
-		s->len++;
+		string = ft_itoa(1);//exit.status
+		s->var = ft_strdup(string);
+		s->to_free = 1;
+		free(string);
 	}
-	else
+	if (!s->var)
 	{
-		if (ft_hundling(s, data, string) == 1)
-			return ;
+		s->check = 1;
+		free(s->identify);
+		return (1);
 	}
-}
-
-void	ft_skip(t_token *s, char *data)
-{
-	s->string[s->len] = '\'';
-	s->len++;
-	while (data[s->j] && data[s->j] != '\'')
-	{
-		s->string[s->len] = data[s->j];
-		s->len++;
-		s->j++;
-	}
-	s->string[s->len] = '\'';
-}
-
-void	ft_remove_quote(t_node *head)
-{
-	t_node	*node;
-	char	*string;
-
-	node = head;
-	while (node)
-	{
-		string = malloc(sizeof(char *) * ft_strlen(node->data) + 1);
-		string = ft_if_remove(node->data, string);
-		free(node->data);
-		node->data = string;
-		node->quote = 1;
-		node = node->next;
-	}
-}
-
-void	ft_quote(t_cmd *cmd)
-{
-	t_cmd	*tmp;
-
-	tmp = cmd;
-	while (tmp)
-	{
-		if (tmp->args)
-			ft_remove_quote(tmp->args);
-		if (tmp->out_reds)
-			ft_remove_quote(tmp->out_reds);
-		if (tmp->in_reds)
-			ft_remove_quote(tmp->in_reds);
-		if (tmp->her_reds)
-			ft_remove_quote(tmp->her_reds);
-		tmp = tmp->next;
-	}
+	s->i = s->i + ft_strlen(s->identify);
+	ft_memcpy(&s->dup[s->len], s->var, ft_strlen(s->var));
+	s->len = s->len + ft_strlen(s->var);
+	free(s->identify);
+	if (s->to_free == 1)
+		free(s->var);
+	return (0);
 }
