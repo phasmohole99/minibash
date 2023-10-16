@@ -6,7 +6,7 @@
 /*   By: mrital- <mrital-@student.1337.ma>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/10/09 23:28:00 by mrital-           #+#    #+#             */
-/*   Updated: 2023/10/12 20:53:25 by mrital-          ###   ########.fr       */
+/*   Updated: 2023/10/16 17:49:20 by mrital-          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,16 +81,13 @@ void ft_get_len(t_tokenizer *token,char *data,char **env)
 
 void expand(t_data *data)
 {
+    if(!data)
+        return;
     t_tokenizer *cmd = data->tokenizer;
 
     while (cmd)
     {
         ft_mini_expen(cmd,data->env);
-        if(cmd->type == RED_IN)
-            ft_mini_expen(cmd,data->env);
-        if(cmd->type == RED_OUT_APPEND 
-        || cmd ->type == RED_OUT_TRUNC)
-            ft_mini_expen(cmd,data->env);
         cmd = cmd->next;
     }
 }
